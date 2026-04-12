@@ -1,7 +1,6 @@
+Copyright © 2026 강창원
 All rights reserved.
 
-This repository package was prepared for publication convenience.
-The app itself displays a copyright notice in the footer:
-© 2026@작성자. All rights reserved.
-
-Before public release, replace the displayed author name in the app as needed.
+This repository and the included application package are proprietary.
+No part of this work may be copied, modified, redistributed, or republished
+without prior permission from the copyright holder.
