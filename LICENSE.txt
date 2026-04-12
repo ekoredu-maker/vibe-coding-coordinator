@@ -1,0 +1,7 @@
+All rights reserved.
+
+This repository package was prepared for publication convenience.
+The app itself displays a copyright notice in the footer:
+© 2026@작성자. All rights reserved.
+
+Before public release, replace the displayed author name in the app as needed.

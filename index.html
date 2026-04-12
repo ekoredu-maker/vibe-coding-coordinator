@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>바이브 코딩 코디네이터 - 안정화 수정판</title>
+  <style>
+    :root{
+      --bg:#f4f7fb; --card:#ffffff; --ink:#16202b; --muted:#5f6b7a; --line:#dde5ef;
+      --primary:#4f46e5; --primary-weak:#eef2ff; --accent:#ec4899; --success:#0f9f6e;
+      --warn:#b45309; --danger:#c0392b; --shadow:0 18px 45px rgba(32,43,64,.08); --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#eef3fb 0%,#f7f9fc 100%);color:var(--ink);
+      font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+    .wrap{max-width:1120px;margin:0 auto;padding:18px}
+    .hero{background:linear-gradient(135deg,#4338ca 0%,#7c3aed 55%,#ec4899 100%);color:#fff;border-radius:28px;
+      box-shadow:0 22px 60px rgba(76,29,149,.28);padding:26px;margin-bottom:18px;position:relative;overflow:hidden}
+    .hero::after{content:"";position:absolute;right:-40px;top:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(255,255,255,.18),rgba(255,255,255,0))}
+    .hero h1{margin:0 0 8px;font-size:clamp(1.8rem,3vw,2.6rem)}
+    .hero p{margin:6px 0;color:rgba(255,255,255,.94)}
+    .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .badge,.pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 14px;font-size:.92rem;font-weight:700}
+    .badge{background:rgba(255,255,255,.18)}
+    .pill{background:#eef2ff;color:var(--primary)}
+    .grid{display:grid;gap:16px}
+    .grid.two{grid-template-columns:1.08fr .92fr}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .section-title h2{margin:0;font-size:1.18rem}
+    .muted{color:var(--muted)}
+    .steps,.checklist,.status-box{display:grid;gap:10px}
+    .step,.check{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff}
+    .check{grid-template-columns:24px 1fr}
+    .step-num{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:var(--primary-weak);color:var(--primary);font-weight:900}
+    .tabs{display:flex;gap:10px;overflow:auto;padding-bottom:6px;margin-bottom:14px}
+    .tab-btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--muted);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700;white-space:nowrap}
+    .tab-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .form-grid.one{grid-template-columns:1fr}
+    .field{display:flex;flex-direction:column;gap:8px}
+    .field label{font-weight:800;font-size:.97rem}
+    .help{font-size:.88rem;color:var(--muted);background:#f8fafc;border-left:4px solid var(--primary);padding:10px 12px;border-radius:10px}
+    input[type="text"],select,textarea{width:100%;border:1.6px solid #d9e2ee;background:#fff;border-radius:12px;padding:12px 13px;font:inherit;color:var(--ink);outline:none;transition:.18s ease}
+    textarea{min-height:110px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(79,70,229,.10)}
+    .option-group{display:grid;gap:12px}
+    .option{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:14px;background:#fff;cursor:pointer}
+    .option strong{display:block;margin-bottom:3px}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+    button{border:none;border-radius:12px;padding:12px 16px;font:inherit;font-weight:800;cursor:pointer}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-secondary{background:#eef2f7;color:#233246}
+    .btn-soft{background:var(--primary-weak);color:var(--primary)}
+    .btn-danger{background:#fff1f1;color:var(--danger)}
+    .mini{padding:8px 12px;font-size:.92rem}
+    .status{padding:12px 14px;border-radius:12px;font-weight:700}
+    .status.good{background:#ecfdf5;color:#065f46;border:1px solid #c6f6df}
+    .status.warn{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
+    .status.bad{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+    .output-wrap{display:none;margin-top:16px}
+    .output-wrap.active{display:block}
+    .output-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    pre{margin:0;background:#111827;color:#d1fae5;border-radius:16px;padding:16px;overflow:auto;max-height:520px;white-space:pre-wrap;word-break:break-word;border:1px solid #263246;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9rem;line-height:1.6}
+    .score{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .bar{height:10px;background:#edf2f7;border-radius:999px;overflow:hidden;flex:1;min-width:180px}
+    .bar>span{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#4f46e5,#ec4899);width:0%}
+    .small{font-size:.86rem}
+    .danger-note{padding:10px 12px;border-radius:12px;background:#fff7ed;border:1px solid #fdba74;color:#9a3412}
+    .message-box{display:none;margin-top:12px}
+    .message-box.active{display:block}
+    .footer{margin:16px 0 28px;text-align:center;color:var(--muted);font-size:.92rem}
+    .hidden{display:none !important}
+    .hint-list{margin:0;padding-left:18px;color:var(--muted)}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .checkmark{width:18px;height:18px;border-radius:6px;background:#eef2ff;display:inline-grid;place-items:center;color:var(--primary);font-weight:900}
+    .missing{border-color:#f59e0b !important;box-shadow:0 0 0 4px rgba(245,158,11,.12)}
+    .kicker{font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;font-weight:900;color:#e9ddff}
+    @media (max-width:900px){.grid.two,.form-grid,.split{grid-template-columns:1fr}.wrap{padding:14px}.hero{padding:22px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="kicker">Stable • beginner-safe • direct prompt generation</div>
+      <h1>🎵 바이브 코딩 코디네이터</h1>
+      <p>생성 버튼이 눌려도 반응이 없는 문제를 줄이기 위해 <strong>생성 로직을 단순화</strong>하고, 저장 기능과 분리한 <strong>안정화 수정판</strong>입니다.</p>
+      <p>이제는 저장이 실패해도 <strong>AI 작업지시서 생성 자체는 계속 작동</strong>하도록 바꾸었습니다.</p>
+      <div class="badge-row">
+        <span class="badge">🛠 생성 로직 단순화</span>
+        <span class="badge">💾 저장 실패 분리 처리</span>
+        <span class="badge">📋 바로 복사 가능</span>
+        <span class="badge">📱 모바일 브라우저 대응 강화</span>
+      </div>
+    </section>
+
+    <div class="grid two">
+      <section class="card">
+        <div class="section-title">
+          <h2>처음이라면 이렇게</h2>
+          <span class="pill">추천 절차</span>
+        </div>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div><strong>무엇이 불편한지 한 문장으로 적기</strong><br><span class="muted">예: 체크리스트를 종이로 관리해 누락이 생긴다.</span></div></div>
+          <div class="step"><div class="step-num">2</div><div><strong>사용자가 실제로 할 행동 순서 쓰기</strong><br><span class="muted">열기 → 입력 → 저장 → 불러오기 → 출력 순서가 가장 좋습니다.</span></div></div>
+          <div class="step"><div class="step-num">3</div><div><strong>환경을 정확히 고르기</strong><br><span class="muted">메모장+브라우저만 가능한지, 파이썬이 되는지에 따라 AI 답이 달라집니다.</span></div></div>
+          <div class="step"><div class="step-num">4</div><div><strong>예외상황과 테스트를 넣기</strong><br><span class="muted">빈칸, 저장 실패, 모바일 폭 문제를 먼저 적으면 오류가 줄어듭니다.</span></div></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <h2>AI가 꼭 알아야 하는 것</h2>
+          <span class="pill">필수 정보</span>
+        </div>
+        <div class="checklist">
+          <div class="check"><div class="checkmark">✓</div><div><strong>문제와 목표</strong><div class="muted">왜 만드는지, 끝나면 무엇이 좋아지는지</div></div></div>
+          <div class="check"><div class="checkmark">✓</div><div><strong>사용자와 기기</strong><div class="muted">누가, 어떤 환경에서 쓰는지</div></div></div>
+          <div class="check"><div class="checkmark">✓</div><div><strong>기능 흐름</strong><div class="muted">사용자 행동 순서대로</div></div></div>
+          <div class="check"><div class="checkmark">✓</div><div><strong>입력/출력/저장 방식</strong><div class="muted">무엇을 넣고 무엇을 보며 어디에 저장하는지</div></div></div>
+          <div class="check"><div class="checkmark">✓</div><div><strong>예외상황과 테스트</strong><div class="muted">오류 처리와 검수 기준</div></div></div>
+        </div>
+        <div class="danger-note" style="margin-top:12px;">민감정보는 브라우저 저장만으로 안전하지 않습니다. 이 도구는 프롬프트 설계용입니다.</div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:16px;">
+      <div class="section-title">
+        <h2>빠른 시작</h2>
+        <div class="btn-row">
+          <button class="btn-soft mini" type="button" id="sampleChecklistBtn">예시 채우기: 체크리스트 앱</button>
+          <button class="btn-soft mini" type="button" id="sampleGameBtn">예시 채우기: 미니 게임</button>
+          <button class="btn-secondary mini" type="button" id="emptyBtn">빈칸으로 시작</button>
+        </div>
+      </div>
+      <p class="muted">완전히 처음이면 예시를 넣고 바로 생성 버튼을 눌러 보세요.</p>
+    </section>
+
+    <section class="card" style="margin-top:16px;">
+      <div class="section-title">
+        <h2>프로젝트 작성</h2>
+        <div class="btn-row">
+          <button class="btn-secondary mini" type="button" id="saveBtn">💾 저장</button>
+          <button class="btn-secondary mini" type="button" id="loadBtn">📂 불러오기</button>
+          <button class="btn-secondary mini" type="button" id="exportBtn">⬇️ JSON 내보내기</button>
+          <label class="btn-secondary mini" for="importFile" style="display:inline-flex;align-items:center;cursor:pointer;">⬆️ JSON 가져오기</label>
+          <input id="importFile" type="file" accept="application/json" class="hidden" />
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" type="button" data-tab="tab-basic">1. 기본</button>
+        <button class="tab-btn" type="button" data-tab="tab-problem">2. 문제/목표</button>
+        <button class="tab-btn" type="button" data-tab="tab-flow">3. 기능 흐름</button>
+        <button class="tab-btn" type="button" data-tab="tab-data">4. 데이터/예외</button>
+        <button class="tab-btn" type="button" data-tab="tab-quality">5. 품질/출력</button>
+      </div>
+
+      <div id="tab-basic" class="tab-panel active">
+        <div class="form-grid">
+          <div class="field">
+            <label for="authorName">개발자/기획자 이름 *</label>
+            <input id="authorName" type="text" placeholder="예: 홍길동 교사" />
+            <div class="help">화면 하단 저작권 표시에 들어갑니다.</div>
+          </div>
+          <div class="field">
+            <label for="projectName">프로젝트 이름 *</label>
+            <input id="projectName" type="text" placeholder="예: 학교 업무 체크리스트" />
+          </div>
+          <div class="field">
+            <label for="projectSummary">한 줄 설명</label>
+            <input id="projectSummary" type="text" placeholder="예: 오프라인 브라우저용 체크리스트 앱" />
+          </div>
+          <div class="field">
+            <label for="targetUsers">주 사용자 *</label>
+            <input id="targetUsers" type="text" placeholder="예: 교사, 학생, 행정실무사" />
+          </div>
+          <div class="field">
+            <label for="deviceContext">사용 기기와 상황 *</label>
+            <input id="deviceContext" type="text" placeholder="예: 갤럭시탭, 학교 PC, 인터넷 제한 환경" />
+          </div>
+          <div class="field">
+            <label for="devEnv">개발 및 실행 환경 *</label>
+            <select id="devEnv">
+              <option value="browser">1. 메모장 + 브라우저만 가능 (설치 불가)</option>
+              <option value="portable">2. 설치 불가, 포터블 실행 가능</option>
+              <option value="cloud">3. 인터넷 가능, 웹 IDE 사용</option>
+              <option value="ide">4. VS Code 등 설치 가능</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label>생성 방식 *</label>
+          <div class="option-group">
+            <label class="option">
+              <input type="radio" name="buildMode" value="light" checked />
+              <span><strong>라이트 모드</strong><span class="muted"> — 단일 HTML 우선. 초보자 기본 추천.</span><br><span class="small muted">바로 저장해서 브라우저에서 실행 가능한 코드를 요청합니다.</span></span>
+            </label>
+            <label class="option">
+              <input type="radio" name="buildMode" value="pro" />
+              <span><strong>프로 모드</strong><span class="muted"> — 단계별 설계/로직/UI 통합.</span><br><span class="small muted">복잡한 시스템을 단계적으로 요청합니다.</span></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-problem" class="tab-panel">
+        <div class="form-grid one">
+          <div class="field">
+            <label for="painPoint">현재의 문제/불편 *</label>
+            <textarea id="painPoint" placeholder="예: 수기로 체크해서 누락이 생기고 모바일에서 보기 불편합니다."></textarea>
+          </div>
+          <div class="field">
+            <label for="mainGoal">이 프로젝트의 메인 목표 *</label>
+            <textarea id="mainGoal" placeholder="예: 설치 없이 브라우저에서 열어 바로 체크하고 저장할 수 있는 단일 파일 도구를 만들고 싶습니다."></textarea>
+          </div>
+          <div class="field">
+            <label for="successOutcome">완료되었다고 볼 기준 *</label>
+            <textarea id="successOutcome" placeholder="예: 입력, 저장, 불러오기, 인쇄가 오류 없이 동작해야 합니다."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-flow" class="tab-panel">
+        <div class="form-grid one">
+          <div class="field">
+            <label for="coreActions">사용자 행동 순서대로 기능 쓰기 *</label>
+            <textarea id="coreActions" placeholder="1. 앱을 연다.&#10;2. 입력한다.&#10;3. 저장한다.&#10;4. 다시 불러온다."></textarea>
+          </div>
+          <div class="field">
+            <label for="priorityOrder">우선순위</label>
+            <textarea id="priorityOrder" placeholder="1순위: 핵심 기능&#10;2순위: 저장/불러오기"></textarea>
+          </div>
+          <div class="field">
+            <label for="inputSpec">입력값 / 입력 방식</label>
+            <textarea id="inputSpec" placeholder="예: 텍스트 입력, 체크박스, 숫자 입력"></textarea>
+          </div>
+          <div class="field">
+            <label for="outputSpec">출력값 / 결과 화면</label>
+            <textarea id="outputSpec" placeholder="예: 총점, 상태표, 저장 목록"></textarea>
+          </div>
+          <div class="field">
+            <label for="uiStyle">원하는 화면 스타일</label>
+            <textarea id="uiStyle" placeholder="예: 큰 버튼, 모바일 우선, 단순한 업무형 화면"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-data" class="tab-panel">
+        <div class="form-grid one">
+          <div class="field">
+            <label for="dataStructure">저장/계산해야 할 데이터</label>
+            <textarea id="dataStructure" placeholder="예: 점수(number), 메모(string), 체크 상태(boolean)"></textarea>
+          </div>
+          <div class="field">
+            <label for="storageRule">저장 방식과 보안 요구</label>
+            <textarea id="storageRule" placeholder="예: localStorage 저장, 외부 서버 사용 금지, 민감정보 미저장"></textarea>
+          </div>
+          <div class="field">
+            <label for="edgeCases">예외상황 / 오류 처리 *</label>
+            <textarea id="edgeCases" placeholder="예: 빈칸이면 안내, 잘못된 파일이면 오류 메시지, 모바일 폭이 좁으면 세로 배치"></textarea>
+          </div>
+          <div class="field">
+            <label for="references">참고해야 할 예시/기존 파일</label>
+            <textarea id="references" placeholder="예: 기존 체크리스트 양식, 원하는 디자인 느낌"></textarea>
+          </div>
+          <div class="field">
+            <label for="restrictions">금지사항 / 피하고 싶은 것</label>
+            <textarea id="restrictions" placeholder="예: 회원가입 금지, 외부 CDN 최소화, 복잡한 설치 금지"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-quality" class="tab-panel">
+        <div class="form-grid one">
+          <div class="field">
+            <label for="testChecklist">AI가 스스로 확인할 테스트 항목 *</label>
+            <textarea id="testChecklist" placeholder="예: 1. 저장 후 새로고침해도 유지됨&#10;2. 모바일에서도 버튼이 눌림&#10;3. 오류 없이 실행됨"></textarea>
+          </div>
+          <div class="field">
+            <label for="handoffFormat">최종 산출물 형식 *</label>
+            <textarea id="handoffFormat" placeholder="예: 단일 HTML 파일 1개, 실행 방법 설명, 수정 가능한 위치 주석 포함"></textarea>
+          </div>
+          <div class="field">
+            <label for="extraNotes">추가 요청</label>
+            <textarea id="extraNotes" placeholder="예: 한글 UI, 쉬운 설명, 코드 주석 포함"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid two" style="margin-top:16px;">
+      <section class="card">
+        <div class="section-title">
+          <h2>품질 점검</h2>
+          <span class="pill">자동 진단</span>
+        </div>
+        <div class="score">
+          <strong id="qualityLabel">준비 점수 0 / 100</strong>
+          <div class="bar"><span id="qualityBar"></span></div>
+        </div>
+        <div id="qualitySummary" class="status warn" style="margin-top:12px;">아직 입력이 부족합니다.</div>
+        <div id="reviewList" class="status-box" style="margin-top:12px;"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <h2>생성 및 활용</h2>
+          <span class="pill">실행</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn-primary" type="button" id="generateBtn" onclick="window.generatePromptDirect && window.generatePromptDirect()">✨ AI 작업 지시서 생성</button>
+          <button class="btn-secondary" type="button" id="copyBtn">📋 복사</button>
+          <button class="btn-secondary" type="button" id="downloadTxtBtn">⬇️ TXT 저장</button>
+          <button class="btn-danger" type="button" id="resetBtn">🔄 입력 초기화</button>
+        </div>
+        <div id="messageBox" class="message-box status warn">안내 메시지</div>
+        <div class="help" style="margin-top:12px;">생성 버튼은 저장 기능과 분리되어 있습니다. 저장이 막혀도 작업지시서 생성은 되도록 수정했습니다.</div>
+      </section>
+    </div>
+
+    <section class="card output-wrap" id="outputWrap" style="margin-top:16px;">
+      <div class="output-head">
+        <div>
+          <h2 style="margin:0;">완성된 AI 작업 지시서</h2>
+          <div class="muted small">아래 텍스트를 그대로 복사해 AI에 붙여넣으세요.</div>
+        </div>
+        <span class="pill" id="promptTypeLabel">라이트 모드</span>
+      </div>
+      <pre id="promptOutput"></pre>
+      <details style="margin-top:12px;">
+        <summary>포함된 핵심 요소 보기</summary>
+        <div class="split">
+          <div class="card" style="box-shadow:none;">
+            <h3>들어가는 정보</h3>
+            <ul class="hint-list">
+              <li>문제, 목표, 사용자, 기기, 환경 제약</li>
+              <li>기능 흐름, 입력/출력, 데이터 구조</li>
+              <li>예외상황, 테스트, 최종 산출물 형식</li>
+            </ul>
+          </div>
+          <div class="card" style="box-shadow:none;">
+            <h3>오류를 줄이는 장치</h3>
+            <ul class="hint-list">
+              <li>필수 항목 누락 표시</li>
+              <li>저장 실패와 생성 기능 분리</li>
+              <li>직접 onclick + addEventListener 이중 연결</li>
+            </ul>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <div class="footer">
+      <p><strong>바이브 코딩 코디네이터</strong> — 안정화 수정판</p>
+      <p>프로젝트 데이터는 가능한 경우에만 브라우저 로컬 저장소에 저장됩니다.</p>
+      <p id="copyrightLine">© 2026@작성자. All rights reserved.</p>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var STORAGE_KEY = 'vibeCodingCoordinator_v3';
+      var memoryStore = {};
+      var DEFAULTS = {
+        authorName:'', projectName:'', projectSummary:'', targetUsers:'', deviceContext:'',
+        devEnv:'browser', buildMode:'light', painPoint:'', mainGoal:'', successOutcome:'',
+        coreActions:'', priorityOrder:'', inputSpec:'', outputSpec:'', uiStyle:'',
+        dataStructure:'', storageRule:'', edgeCases:'', references:'', restrictions:'',
+        testChecklist:'', handoffFormat:'', extraNotes:''
+      };
+
+      var REQUIRED_FIELDS = ['authorName','projectName','targetUsers','deviceContext','painPoint','mainGoal','successOutcome','coreActions','edgeCases','testChecklist','handoffFormat'];
+      var FIELD_LABELS = {
+        authorName:'개발자/기획자 이름', projectName:'프로젝트 이름', targetUsers:'주 사용자',
+        deviceContext:'사용 기기와 상황', painPoint:'현재의 문제/불편', mainGoal:'메인 목표',
+        successOutcome:'완료 기준', coreActions:'사용자 행동 순서', edgeCases:'예외상황/오류 처리',
+        testChecklist:'AI 테스트 항목', handoffFormat:'최종 산출물 형식'
+      };
+
+      var ENV_TEXT = {
+        browser:'통합개발환경이나 패키지 설치가 막힌 환경입니다. 오직 기본 텍스트 에디터와 웹 브라우저만 사용 가능합니다. 별도 설치 없이 파일 더블클릭만으로 실행되어야 합니다.',
+        portable:'프로그램 설치는 불가능하지만 포터블 실행은 가능한 환경입니다. 라이브러리 의존성을 최소화하고 휴대형 실행을 우선 고려해야 합니다.',
+        cloud:'로컬 설치보다 웹 기반 개발 환경이 적합합니다. Colab, Replit 같은 온라인 환경에서 즉시 복사/실행 가능한 형태가 유리합니다.',
+        ide:'VS Code 등 IDE 설치가 가능한 환경입니다. 표준적인 폴더 구조, 모듈화, 실행 방법 안내까지 포함해도 됩니다.'
+      };
+
+      function $(id){ return document.getElementById(id); }
+      function showMessage(text, level){
+        var box = $('messageBox');
+        if(!box) return;
+        box.className = 'message-box status ' + (level || 'warn') + ' active';
+        box.textContent = text;
+      }
+      function hideMessage(){
+        var box = $('messageBox');
+        if(box) box.className = 'message-box status warn';
+      }
+
+      function safeStorageAvailable(){
+        try{
+          var testKey = '__vibe_test__';
+          window.localStorage.setItem(testKey, '1');
+          window.localStorage.removeItem(testKey);
+          return true;
+        }catch(e){
+          return false;
+        }
+      }
+      function storageSet(key, value){
+        try{
+          if(safeStorageAvailable()){ window.localStorage.setItem(key, value); return true; }
+        }catch(e){}
+        memoryStore[key] = value;
+        return false;
+      }
+      function storageGet(key){
+        try{
+          if(safeStorageAvailable()){ return window.localStorage.getItem(key); }
+        }catch(e){}
+        return memoryStore[key] || null;
+      }
+
+      function getBuildMode(){
+        var checked = document.querySelector('input[name="buildMode"]:checked');
+        return checked ? checked.value : 'light';
+      }
+      function setBuildMode(mode){
+        var target = document.querySelector('input[name="buildMode"][value="' + mode + '"]');
+        if(target) target.checked = true;
+      }
+      function setActiveTab(tabId){
+        var tabs = document.querySelectorAll('.tab-btn');
+        var panels = document.querySelectorAll('.tab-panel');
+        for(var i=0;i<tabs.length;i++){
+          tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab') === tabId);
+        }
+        for(var j=0;j<panels.length;j++){
+          panels[j].classList.toggle('active', panels[j].id === tabId);
+        }
+      }
+      function clearMissingMarks(){
+        var fields = document.querySelectorAll('input[type="text"], textarea, select');
+        for(var i=0;i<fields.length;i++){ fields[i].classList.remove('missing'); }
+      }
+      function markMissing(fieldId){
+        var el = $(fieldId);
+        if(el) el.classList.add('missing');
+      }
+
+      function getFormData(){
+        var data = {};
+        for(var key in DEFAULTS){
+          if(key === 'buildMode') data[key] = getBuildMode();
+          else data[key] = $(key) ? String($(key).value || '').trim() : '';
+        }
+        return data;
+      }
+      function applyData(data){
+        var merged = {};
+        for(var key in DEFAULTS){ merged[key] = DEFAULTS[key]; }
+        for(var key2 in data){ merged[key2] = data[key2]; }
+
+        for(var k in DEFAULTS){
+          if(k === 'buildMode') setBuildMode(merged[k]);
+          else if($(k)) $(k).value = merged[k] || '';
+        }
+        refreshCopyright();
+        runReview();
+      }
+      function refreshCopyright(){
+        var name = $('authorName').value.trim() || '작성자';
+        $('copyrightLine').textContent = '© 2026@' + name + '. All rights reserved.';
+      }
+
+      function runReview(){
+        var data = getFormData();
+        var score = 0;
+        var items = [];
+
+        clearMissingMarks();
+
+        for(var i=0;i<REQUIRED_FIELDS.length;i++){
+          var key = REQUIRED_FIELDS[i];
+          if(data[key]) score += 6;
+          else{
+            items.push({level:'bad', text:'필수 항목 누락: ' + FIELD_LABELS[key]});
+            markMissing(key);
+          }
+        }
+
+        var optional = ['projectSummary','priorityOrder','inputSpec','outputSpec','uiStyle','dataStructure','storageRule','references','restrictions','extraNotes'];
+        for(var j=0;j<optional.length;j++){
+          if(data[optional[j]]) score += 3;
+        }
+
+        if(data.devEnv === 'browser' && data.buildMode === 'pro'){
+          items.push({level:'warn', text:'브라우저 전용 환경인데 프로 모드입니다. 복잡한 시스템이 아니라면 라이트 모드가 더 안전합니다.'});
+        }
+        if((data.storageRule + ' ' + data.dataStructure).match(/주민|학번|전화|주소|민감|개인정보/)){
+          items.push({level:'warn', text:'민감정보를 다룰 가능성이 보입니다. 브라우저 저장만으로는 충분한 보안 설계가 아닙니다.'});
+        }
+        if(!data.edgeCases){
+          items.push({level:'warn', text:'예외상황을 적지 않으면 AI가 정상 흐름만 구현하고 오류 처리를 놓칠 수 있습니다.'});
+        }
+        if(!data.testChecklist){
+          items.push({level:'warn', text:'AI 자기검수 항목이 없으면 완성 후 오류를 놓치기 쉽습니다.'});
+        }
+
+        score = Math.min(100, Math.round(score));
+        $('qualityLabel').textContent = '준비 점수 ' + score + ' / 100';
+        $('qualityBar').style.width = score + '%';
+
+        var summary = $('qualitySummary');
+        if(score >= 85){
+          summary.className = 'status good';
+          summary.textContent = '좋습니다. 지금 생성해도 꽤 안정적인 프롬프트가 나옵니다.';
+        }else if(score >= 60){
+          summary.className = 'status warn';
+          summary.textContent = '생성은 가능하지만, 몇 항목만 더 채우면 오류 가능성을 더 줄일 수 있습니다.';
+        }else{
+          summary.className = 'status bad';
+          summary.textContent = '핵심 정보가 아직 부족합니다. 그래도 생성은 가능하도록 바꾸었습니다.';
+        }
+
+        var reviewList = $('reviewList');
+        reviewList.innerHTML = '';
+        if(items.length === 0){
+          var good = document.createElement('div');
+          good.className = 'status good';
+          good.textContent = '큰 누락 경고가 없습니다.';
+          reviewList.appendChild(good);
+        }else{
+          for(var n=0;n<items.length;n++){
+            var div = document.createElement('div');
+            div.className = 'status ' + (items[n].level === 'bad' ? 'bad' : 'warn');
+            div.textContent = items[n].text;
+            reviewList.appendChild(div);
+          }
+        }
+        return {score:score, items:items, data:data};
+      }
+
+      function sanitizeFileName(name){
+        return String(name || 'vibe').replace(/[\\/:*?"<>|]+/g,'-').replace(/\s+/g,'_').slice(0,80);
+      }
+
+      function saveLocal(){
+        var data = getFormData();
+        var ok = storageSet(STORAGE_KEY, JSON.stringify(data));
+        if(ok) showMessage('현재 입력 내용이 이 브라우저에 저장되었습니다.', 'good');
+        else showMessage('브라우저 저장이 제한되어 임시 메모리로만 보관됩니다. 생성 기능은 정상 작동합니다.', 'warn');
+      }
+      function loadLocal(){
+        var raw = storageGet(STORAGE_KEY);
+        if(!raw){
+          showMessage('불러올 저장 내용이 없습니다.', 'warn');
+          return;
+        }
+        try{
+          applyData(JSON.parse(raw));
+          showMessage('저장된 내용을 불러왔습니다.', 'good');
+        }catch(e){
+          showMessage('저장 데이터를 읽는 중 오류가 발생했습니다.', 'bad');
+        }
+      }
+      function exportJson(){
+        try{
+          var text = JSON.stringify(getFormData(), null, 2);
+          var blob = new Blob([text], {type:'application/json'});
+          var a = document.createElement('a');
+          var projectName = $('projectName').value.trim() || 'vibe-project';
+          a.href = URL.createObjectURL(blob);
+          a.download = sanitizeFileName(projectName) + '.json';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function(){
+            URL.revokeObjectURL(a.href);
+            a.remove();
+          }, 300);
+          showMessage('JSON 파일로 내보냈습니다.', 'good');
+        }catch(e){
+          showMessage('JSON 내보내기에 실패했습니다.', 'bad');
+        }
+      }
+      function importJson(file){
+        var reader = new FileReader();
+        reader.onload = function(e){
+          try{
+            var parsed = JSON.parse(String(e.target.result || '{}'));
+            applyData(parsed);
+            showMessage('JSON 파일을 불러왔습니다.', 'good');
+          }catch(err){
+            showMessage('유효한 JSON 파일이 아닙니다.', 'bad');
+          }
+        };
+        reader.onerror = function(){ showMessage('파일을 읽지 못했습니다.', 'bad'); };
+        reader.readAsText(file, 'utf-8');
+      }
+      function resetForm(){
+        applyData(DEFAULTS);
+        setActiveTab('tab-basic');
+        $('outputWrap').classList.remove('active');
+        $('promptOutput').textContent = '';
+        showMessage('입력 내용을 초기화했습니다.', 'good');
+      }
+      function openTabForField(field){
+        var map = {
+          authorName:'tab-basic', projectName:'tab-basic', targetUsers:'tab-basic', deviceContext:'tab-basic',
+          painPoint:'tab-problem', mainGoal:'tab-problem', successOutcome:'tab-problem',
+          coreActions:'tab-flow', edgeCases:'tab-data', testChecklist:'tab-quality', handoffFormat:'tab-quality'
+        };
+        if(map[field]) setActiveTab(map[field]);
+        if($(field)) $(field).focus();
+      }
+
+      function fallbackText(v, text){
+        return (v && String(v).trim()) ? String(v).trim() : text;
+      }
+
+      function createPrompt(data){
+        var commonMeta = '【프로젝트명】 ' + fallbackText(data.projectName, '미입력 프로젝트') + '\n'
+          + '【한 줄 설명】 ' + fallbackText(data.projectSummary, '-') + '\n'
+          + '【주 사용자】 ' + fallbackText(data.targetUsers, '미입력') + '\n'
+          + '【사용 기기/상황】 ' + fallbackText(data.deviceContext, '미입력') + '\n'
+          + '【기획자】 ' + fallbackText(data.authorName, '작성자');
+
+        var commonBody = '【현재 문제】\n' + fallbackText(data.painPoint, '미입력') + '\n\n'
+          + '【메인 목표】\n' + fallbackText(data.mainGoal, '미입력') + '\n\n'
+          + '【완료 기준】\n' + fallbackText(data.successOutcome, '미입력') + '\n\n'
+          + '【핵심 기능 흐름】\n' + fallbackText(data.coreActions, '미입력') + '\n\n'
+          + '【우선순위】\n' + fallbackText(data.priorityOrder, '-') + '\n\n'
+          + '【입력값/입력 방식】\n' + fallbackText(data.inputSpec, '-') + '\n\n'
+          + '【출력값/결과 화면】\n' + fallbackText(data.outputSpec, '-') + '\n\n'
+          + '【화면/UI 스타일】\n' + fallbackText(data.uiStyle, '-') + '\n\n'
+          + '【데이터 구조】\n' + fallbackText(data.dataStructure, '-') + '\n\n'
+          + '【저장 방식/보안 요구】\n' + fallbackText(data.storageRule, '-') + '\n\n'
+          + '【예외상황/오류 처리】\n' + fallbackText(data.edgeCases, '미입력') + '\n\n'
+          + '【참고 예시/자료】\n' + fallbackText(data.references, '-') + '\n\n'
+          + '【금지사항/회피사항】\n' + fallbackText(data.restrictions, '-') + '\n\n'
+          + '【AI 자기검수 테스트】\n' + fallbackText(data.testChecklist, '미입력') + '\n\n'
+          + '【최종 산출물 형식】\n' + fallbackText(data.handoffFormat, '미입력') + '\n\n'
+          + '【추가 요청】\n' + fallbackText(data.extraNotes, '-') + '\n\n'
+          + '【개발 및 실행 환경 제약】\n' + (ENV_TEXT[data.devEnv] || ENV_TEXT.browser);
+
+        var copyrightLine = '모든 최종 통합 결과물의 화면 하단에는 반드시 다음 저작권 문구를 넣어 주세요: © 2026@'
+          + fallbackText(data.authorName, '작성자') + '. All rights reserved.';
+
+        if(getBuildMode() === 'light'){
+          return '=== 🎵 바이브 코딩: 라이트 모드(초보자/즉시 실행형) ===\n\n'
+            + commonMeta + '\n\n'
+            + commonBody + '\n\n'
+            + '=== 📋 AI 작업 지시서 ===\n'
+            + '위 요구사항을 바탕으로, 초보자가 바로 사용할 수 있는 단일 HTML 파일(Single HTML File)을 작성해 주세요.\n\n'
+            + '[핵심 작업 원칙]\n'
+            + '1. HTML, CSS, JavaScript를 분리하지 말고, 복사해서 바로 저장 가능한 하나의 완전한 코드 블록으로만 출력할 것.\n'
+            + '2. 외부 라이브러리와 CDN은 가능하면 사용하지 말고, 꼭 필요하지 않다면 순수(Vanilla) 코드로 작성할 것.\n'
+            + '3. 사용자가 파일을 .html로 저장한 뒤 브라우저에서 열면 즉시 작동해야 하며, 추가 설치를 요구하지 말 것.\n'
+            + '4. 모바일과 데스크톱 모두에서 기본 사용이 가능하도록 반응형으로 작성할 것.\n'
+            + '5. 빈 입력, 잘못된 입력, 저장 실패 가능성 등 예외상황을 실제 코드에서 처리할 것.\n'
+            + '6. 사용자가 수정해야 할 위치에는 이해하기 쉬운 한글 주석을 넣을 것.\n'
+            + '7. 필요 최소한의 사용법과 함께 코드 자체를 완전하게 제공할 것.\n'
+            + '8. 아래 테스트를 스스로 점검하고 누락 기능이 없도록 할 것.\n\n'
+            + '[AI 자기검수 필수]\n'
+            + '- 요구 기능이 실제로 모두 연결되어 있는지 점검\n'
+            + '- 클릭/입력/저장/불러오기/출력 흐름이 끊기지 않는지 확인\n'
+            + '- 모바일 화면에서도 버튼과 입력칸이 사용 가능한지 확인\n'
+            + '- 콘솔 오류 가능성이 높은 부분을 줄일 것\n\n'
+            + copyrightLine;
+        }
+
+        return '=== 🎵 바이브 코딩: 프로 모드(단계별 설계/통합형) ===\n\n'
+          + commonMeta + '\n\n'
+          + commonBody + '\n\n'
+          + '=== 📋 AI 작업 지시서 ===\n'
+          + '위 요구사항은 기능과 품질 조건이 많으므로, 아래 순서로 단계적으로 진행해 주세요.\n\n'
+          + '[1단계] 요구사항 구조화 및 설계\n'
+          + '- 핵심 문제를 한 문단으로 재정리\n'
+          + '- 필요한 기능을 MVP와 확장 기능으로 구분\n'
+          + '- 데이터 구조, 상태 흐름, 저장 방식, 예외 처리 방식을 먼저 설계\n'
+          + '- 현재 실행 환경 제약을 고려해 가장 현실적인 구현 방식을 제안\n\n'
+          + '[2단계] 핵심 로직 작성\n'
+          + '- 계산, 상태관리, 저장/불러오기, 검증 로직을 먼저 작성\n'
+          + '- 예외상황과 오류 메시지 정책을 함께 포함\n\n'
+          + '[3단계] UI/UX 구현\n'
+          + '- 주 사용자와 사용 기기에 맞춰 화면 구성\n'
+          + '- 모바일/브라우저 환경 호환성 고려\n'
+          + '- 단순하고 유지보수 가능한 UI 작성\n\n'
+          + '[4단계] 통합 및 자체 테스트\n'
+          + '- 위 테스트 항목을 기준으로 스스로 점검\n'
+          + '- 잠재 오류, 누락 기능, 환경 비호환 요소를 명시\n'
+          + '- 최종 실행 방법을 초보자도 따라할 수 있게 단계별로 설명\n\n'
+          + '[반드시 지킬 것]\n'
+          + '- 모호한 요구는 합리적으로 해석하되, 추정한 부분은 표시\n'
+          + '- 예외 처리와 테스트 항목을 코드 수준에서 반영\n'
+          + '- 최종 결과물에 불필요한 의존성이나 과도한 설치 절차를 만들지 말 것\n\n'
+          + copyrightLine;
+      }
+
+      function generatePromptDirect(){
+        hideMessage();
+        var review = runReview();
+        var firstMissing = null;
+        for(var i=0;i<REQUIRED_FIELDS.length;i++){
+          if(!review.data[REQUIRED_FIELDS[i]]){ firstMissing = REQUIRED_FIELDS[i]; break; }
+        }
+
+        var prompt = createPrompt(review.data);
+        $('promptOutput').textContent = prompt;
+        $('outputWrap').classList.add('active');
+        $('promptTypeLabel').textContent = getBuildMode() === 'light' ? '라이트 모드' : '프로 모드';
+
+        try{
+          $('outputWrap').scrollIntoView({behavior:'smooth', block:'start'});
+        }catch(e){
+          try{ $('outputWrap').scrollIntoView(); }catch(e2){}
+        }
+
+        if(firstMissing){
+          openTabForField(firstMissing);
+          showMessage('생성은 완료했지만, 필수 항목 일부가 비어 있어 품질이 떨어질 수 있습니다. 강조된 칸을 채우면 더 좋아집니다.', 'warn');
+        }else{
+          showMessage('AI 작업지시서가 생성되었습니다.', 'good');
+        }
+
+        try{ saveLocal(); }catch(e){}
+      }
+
+      function copyPrompt(){
+        var text = $('promptOutput').textContent.trim();
+        if(!text){
+          showMessage('먼저 작업 지시서를 생성해 주세요.', 'warn');
+          return;
+        }
+        function done(){ showMessage('작업 지시서가 복사되었습니다.', 'good'); }
+        try{
+          if(navigator.clipboard && window.isSecureContext){
+            navigator.clipboard.writeText(text).then(done).catch(function(){ fallback(); });
+          }else{
+            fallback();
+          }
+        }catch(e){ fallback(); }
+
+        function fallback(){
+          try{
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+            done();
+          }catch(err){
+            showMessage('복사에 실패했습니다. 화면의 텍스트를 직접 복사해 주세요.', 'bad');
+          }
+        }
+      }
+
+      function downloadTxt(){
+        var text = $('promptOutput').textContent.trim();
+        if(!text){
+          showMessage('먼저 작업 지시서를 생성해 주세요.', 'warn');
+          return;
+        }
+        try{
+          var blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+          var a = document.createElement('a');
+          var projectName = $('projectName').value.trim() || 'vibe_prompt';
+          a.href = URL.createObjectURL(blob);
+          a.download = sanitizeFileName(projectName) + '_prompt.txt';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function(){
+            URL.revokeObjectURL(a.href);
+            a.remove();
+          }, 300);
+          showMessage('TXT 파일로 저장했습니다.', 'good');
+        }catch(e){
+          showMessage('TXT 저장에 실패했습니다.', 'bad');
+        }
+      }
+
+      function applySampleChecklist(){
+        applyData({
+          authorName:'홍길동 교사',
+          projectName:'학교 업무 체크리스트',
+          projectSummary:'학교 업무 절차를 모바일에서도 쉽게 확인하는 오프라인 체크리스트',
+          targetUsers:'교사와 업무 담당자',
+          deviceContext:'학교 PC와 갤럭시탭, 인터넷 제한 가능',
+          devEnv:'browser',
+          buildMode:'light',
+          painPoint:'업무 절차를 종이로 보거나 메모로 관리해 누락이 생기고, 모바일에서 보기 불편합니다.',
+          mainGoal:'설치 없이 브라우저에서 바로 열 수 있고, 체크/저장/불러오기/인쇄가 가능한 단일 HTML 도구를 만든다.',
+          successOutcome:'체크 항목 선택, 전체 진행률 표시, 저장/불러오기, 인쇄용 보기, 모바일 반응형이 오류 없이 동작해야 한다.',
+          coreActions:'1. 사용자가 앱을 연다.\n2. 체크 항목을 선택한다.\n3. 필요시 메모를 입력한다.\n4. 현재 상태를 저장한다.\n5. 나중에 다시 열어 불러온다.\n6. 인쇄 또는 PDF 저장을 한다.',
+          priorityOrder:'1순위: 체크/저장/불러오기\n2순위: 진행률 시각화\n3순위: 인쇄 화면 정리',
+          inputSpec:'체크박스, 텍스트 메모, 드롭다운 구분 선택',
+          outputSpec:'완료율(%), 현재 상태 요약, 항목별 완료 상태, 인쇄용 화면',
+          uiStyle:'업무용으로 단정하고 큰 버튼, 모바일 우선, 복잡하지 않은 구조',
+          dataStructure:'체크 상태(boolean), 메모(string), 그룹명(string), 저장시각(string)',
+          storageRule:'localStorage에 저장, 외부 서버 사용 금지, 민감정보는 저장하지 않음',
+          edgeCases:'빈 메모는 허용하되 저장 가능. 저장 데이터가 없으면 안내문 표시. 손상된 저장 데이터면 초기화 안내. 모바일 폭이 좁으면 한 열 레이아웃으로 전환.',
+          references:'일반적인 학교 업무 체크리스트 형태 참고',
+          restrictions:'회원가입 기능 금지, 외부 CDN 최소화, 복잡한 애니메이션 금지',
+          testChecklist:'1. 새 항목 체크가 즉시 반영된다.\n2. 저장 후 새로고침해도 유지된다.\n3. 불러오기 버튼이 정상 동작한다.\n4. 모바일에서 버튼이 겹치지 않는다.\n5. 인쇄 화면이 너무 깨지지 않는다.',
+          handoffFormat:'단일 HTML 파일 1개, 복사 후 바로 저장 가능한 완전한 코드, 짧은 실행 방법 안내',
+          extraNotes:'한글 UI로 작성하고, 수정 가능한 부분에 주석을 넣어 달라.'
+        });
+        setActiveTab('tab-basic');
+        showMessage('예시를 채웠습니다. 이제 생성 버튼을 눌러 보세요.', 'good');
+      }
+
+      function applySampleGame(){
+        applyData({
+          authorName:'홍길동',
+          projectName:'미니 반응속도 게임',
+          projectSummary:'버튼을 눌러 기록을 재는 브라우저용 단일 HTML 게임',
+          targetUsers:'학생',
+          deviceContext:'갤럭시탭과 학교 PC 브라우저',
+          devEnv:'browser',
+          buildMode:'light',
+          painPoint:'설치 없이 바로 즐길 수 있는 간단한 게임이 필요합니다.',
+          mainGoal:'브라우저에서 즉시 실행되고 점수 기록까지 가능한 단일 HTML 게임을 만든다.',
+          successOutcome:'시작, 플레이, 점수 표시, 최고 기록 저장, 재시작이 오류 없이 작동해야 한다.',
+          coreActions:'1. 사용자가 게임을 연다.\n2. 시작 버튼을 누른다.\n3. 목표 버튼이 나오면 터치한다.\n4. 기록과 점수를 본다.\n5. 다시 시작한다.',
+          priorityOrder:'1순위: 기본 플레이\n2순위: 최고 기록 저장\n3순위: 효과음과 애니메이션',
+          inputSpec:'시작 버튼, 터치 입력',
+          outputSpec:'현재 기록, 최고 기록, 게임 상태 메시지',
+          uiStyle:'밝고 단순한 게임 화면, 큰 버튼, 모바일 터치 친화적',
+          dataStructure:'현재 점수(number), 최고 점수(number), 게임 상태(string)',
+          storageRule:'최고 기록만 localStorage 저장',
+          edgeCases:'너무 빠른 연속 터치 방지. 시작 전에 터치하면 안내. 화면이 작으면 버튼을 크게 유지.',
+          references:'브라우저 미니게임 느낌',
+          restrictions:'외부 라이브러리 금지, 서버 통신 금지',
+          testChecklist:'1. 시작 버튼이 작동한다.\n2. 점수가 정상 증가한다.\n3. 최고 기록이 저장된다.\n4. 모바일에서 터치가 잘 된다.',
+          handoffFormat:'단일 HTML 파일 1개와 짧은 사용법',
+          extraNotes:'효과는 과하지 않게 하고, 코드 주석을 포함해 달라.'
+        });
+        setActiveTab('tab-basic');
+        showMessage('예시를 채웠습니다. 이제 생성 버튼을 눌러 보세요.', 'good');
+      }
+
+      // expose direct generator for inline onclick fallback
+      window.generatePromptDirect = generatePromptDirect;
+
+      // tab events
+      var tabButtons = document.querySelectorAll('.tab-btn');
+      for(var i=0;i<tabButtons.length;i++){
+        tabButtons[i].addEventListener('click', (function(btn){
+          return function(){ setActiveTab(btn.getAttribute('data-tab')); };
+        })(tabButtons[i]));
+      }
+
+      // input events
+      var inputs = document.querySelectorAll('input[type="text"], textarea, select');
+      for(var j=0;j<inputs.length;j++){
+        inputs[j].addEventListener('input', function(){
+          if(this.id === 'authorName') refreshCopyright();
+          runReview();
+        });
+        inputs[j].addEventListener('change', function(){
+          if(this.id === 'authorName') refreshCopyright();
+          runReview();
+        });
+      }
+      var modes = document.querySelectorAll('input[name="buildMode"]');
+      for(var m=0;m<modes.length;m++){ modes[m].addEventListener('change', runReview); }
+
+      // button events
+      $('generateBtn').addEventListener('click', generatePromptDirect);
+      $('copyBtn').addEventListener('click', copyPrompt);
+      $('downloadTxtBtn').addEventListener('click', downloadTxt);
+      $('resetBtn').addEventListener('click', resetForm);
+      $('saveBtn').addEventListener('click', saveLocal);
+      $('loadBtn').addEventListener('click', loadLocal);
+      $('exportBtn').addEventListener('click', exportJson);
+      $('sampleChecklistBtn').addEventListener('click', applySampleChecklist);
+      $('sampleGameBtn').addEventListener('click', applySampleGame);
+      $('emptyBtn').addEventListener('click', function(){ applyData(DEFAULTS); showMessage('빈칸 상태로 초기화했습니다.', 'good'); });
+      $('importFile').addEventListener('change', function(e){
+        var file = e.target.files && e.target.files[0];
+        if(file) importJson(file);
+        e.target.value = '';
+      });
+
+      // initial load
+      refreshCopyright();
+      var raw = storageGet(STORAGE_KEY);
+      if(raw){
+        try{ applyData(JSON.parse(raw)); showMessage('이전에 저장된 내용을 불러왔습니다.', 'good'); }
+        catch(e){ applyData(DEFAULTS); showMessage('저장 데이터가 손상되어 기본 상태로 시작합니다.', 'warn'); }
+      }else{
+        applyData(DEFAULTS);
+        showMessage('준비되었습니다. 예시 채우기 후 생성 버튼을 눌러 보세요.', 'good');
+      }
+    })();
+  </script>
+</body>
+</html>
