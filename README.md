@@ -1,59 +1,48 @@
-# 바이브 코딩 코디네이터
+# VCC · 바이브 코딩 코디네이터
 
-이 저장소는 **바이브 코딩 코디네이터**를 GitHub에 올리고, GitHub Pages로 바로 배포할 수 있도록 정리한 패키지입니다.
+교육지원청·학교 업무를 분석해 **기획 → 개발 요청서 → 기존 프로그램 진단 → Python Hybrid 전환 → Migration Map/Lab → 배포 점검**까지 이어 주는 업무도구 제작 코디네이터입니다.
 
-## 포함 파일
+## 배포 채널
 
-- `index.html` : 메인 실행 파일
-- `README.md` : 저장소 소개 및 배포 방법
-- `.nojekyll` : GitHub Pages 정적 배포 안정화용 파일
-- `.gitignore` : 기본 무시 규칙
-- `LICENSE.txt` : 권리표시 문구
+- **Web / GitHub Pages**: 설치 없이 브라우저에서 바로 사용
+- **Windows Portable / GitHub Releases**: Python Hybrid 기능과 로컬 파일 처리를 포함하는 실무용 배포판
+- **Source / Repository**: 개발·검증·유지보수용 소스
 
-## 앱 개요
+현재 정식 배포 준비 후보는 **VCC Office Edition v3.5 RC**이며, 검증 완료 후 사용자에게는 **VCC Office Edition 1.0**으로 공개할 예정입니다.
 
-이 도구는 다음 작업을 한 화면에서 수행하도록 설계되어 있습니다.
+## 주요 기능
 
-- 프로젝트 기본 정보 입력
-- 문제, 목표, 기능 흐름, 예외상황 정리
-- 자동 품질 점검
-- AI 작업지시서 생성
-- 복사 / TXT 저장 / JSON 내보내기 / JSON 가져오기
+- 반복 업무를 4서랍(유지·축소·폐지·자동화)으로 재구조화
+- 업무 설명을 입력하면 개발 요청서와 검증 기준 자동 생성
+- 기존 HTML/ZIP 프로그램 구조 진단
+- Python Hybrid 전환 필요도·리팩터링·UI/UX 개선 필요도 분석
+- 함수·이벤트 단위 Migration Mapper
+- 저위험 JavaScript → Python 이관 후보 생성
+- Hybrid 프로젝트 골격 및 검증 ZIP 생성
+- 개인정보·민감정보 입력 위험 점검
+- Windows Portable Release Gate 및 실행 진단
 
-## 로컬 실행
+## 권장 사용법
 
-1. 이 저장소를 다운로드합니다.
-2. `index.html` 파일을 브라우저에서 엽니다.
-3. 바로 사용할 수 있습니다.
+### 1. 바로 사용하기
+GitHub Pages에서 웹 버전을 실행합니다.
 
-## GitHub 업로드 방법
+### 2. Windows 업무용
+GitHub Releases에서 최신 `VCC_Windows_Portable_*.zip`을 내려받아 압축을 푼 뒤 실행합니다.
 
-1. GitHub에서 새 저장소를 만듭니다.
-2. 이 패키지 안의 파일 전체를 저장소 루트에 업로드합니다.
-3. 기본 문서는 `index.html` 이므로 바로 정적 사이트로 사용할 수 있습니다.
+### 3. 개발·검증
+이 저장소의 `main`은 배포 가능한 상태를 유지하고, 기능 변경은 별도 브랜치와 Pull Request에서 검증한 뒤 병합합니다.
 
-## GitHub Pages 배포 방법
+## 배포 원칙
 
-1. 저장소의 **Settings** 로 이동합니다.
-2. 왼쪽 메뉴에서 **Pages** 를 엽니다.
-3. **Build and deployment** 에서 Source를 **Deploy from a branch** 로 선택합니다.
-4. Branch는 **main**, Folder는 **/ (root)** 를 선택합니다.
-5. 저장 후 몇 분 뒤 배포 주소가 생성됩니다.
+1. `main`에 병합하기 전에 자동 품질점검을 통과합니다.
+2. `main` 병합 시 GitHub Pages를 자동 배포합니다.
+3. 정식 버전은 `v1.0.0` 같은 태그로 관리합니다.
+4. Windows Portable ZIP은 GitHub Releases에서 배포합니다.
+5. 실제 학생·교직원·민원인 개인정보나 학교폭력·상담·건강·징계·인사 등 민감자료는 외부 AI에 그대로 입력하지 않습니다.
+
+자세한 배포 절차는 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)를 참고하세요.
 
 ## 저작권
 
-앱 배포본 기본 표시는 아래와 같이 반영했습니다.
-
-`© 2026 강창원. All rights reserved.`
-
-프로그램 내 `개발자/기획자 이름`을 바꾸면 생성되는 문구와 하단 표시는 함께 바뀌지만, 배포본 기본값은 강창원으로 설정되어 있습니다.
-
-## 권장 저장소 설명 문구
-
-브라우저에서 바로 실행되는 단일 HTML 기반 AI 작업지시서 생성 도구
-
-## 권장 저장소 이름 예시
-
-- `vibe-coding-coordinator`
-- `vibe-coding-coordinator-web`
-- `ai-prompt-coordinator`
+© 2026 강창원. All rights reserved.
