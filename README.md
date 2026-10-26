@@ -1,48 +1,56 @@
-# VCC · 바이브 코딩 코디네이터
+# VCC Office Edition 1.1 Open Creator Beta
 
-교육지원청·학교 업무를 분석해 **기획 → 개발 요청서 → 기존 프로그램 진단 → Python Hybrid 전환 → Migration Map/Lab → 배포 점검**까지 이어 주는 업무도구 제작 코디네이터입니다.
+교육지원청·학교 업무프로그램을 **설계·진단·리팩터링·Python 하이브리드 전환**하는 바이브 코딩 코디네이터입니다.
+
+## 바로 사용
+
+GitHub Pages에서 `index.html`을 바로 실행할 수 있습니다.
+
+- 새 업무도구 기획
+- 4분류(유지·축소·폐지·자동화)
+- 개발/검증/배포 요청서 생성
+- 기존 HTML/ZIP 프로그램 진단
+- Hybrid Architect
+- Code Migration Mapper
+- Migration Lab
+- Skeleton / Migration Map / Migration Lab ZIP 생성
 
 ## 배포 채널
 
-- **Web / GitHub Pages**: 설치 없이 브라우저에서 바로 사용
-- **Windows Portable / GitHub Releases**: Python Hybrid 기능과 로컬 파일 처리를 포함하는 실무용 배포판
-- **Source / Repository**: 개발·검증·유지보수용 소스
+- **Web**: GitHub Pages
+- **Windows Portable**: GitHub Releases
+- **Source**: 이 저장소
 
-현재 정식 배포 준비 후보는 **VCC Office Edition v3.5 RC**이며, 검증 완료 후 사용자에게는 **VCC Office Edition 1.0**으로 공개할 예정입니다.
+Windows Release 패키지는 Python 3.14.8 Windows 64-bit embeddable runtime을 포함하도록 GitHub Actions가 자동 생성합니다. 사용 PC에 Python을 별도 설치할 필요가 없습니다.
 
-## 주요 기능
+## Windows 사용
 
-- 반복 업무를 4서랍(유지·축소·폐지·자동화)으로 재구조화
-- 업무 설명을 입력하면 개발 요청서와 검증 기준 자동 생성
-- 기존 HTML/ZIP 프로그램 구조 진단
-- Python Hybrid 전환 필요도·리팩터링·UI/UX 개선 필요도 분석
-- 함수·이벤트 단위 Migration Mapper
-- 저위험 JavaScript → Python 이관 후보 생성
-- Hybrid 프로젝트 골격 및 검증 ZIP 생성
-- 개인정보·민감정보 입력 위험 점검
-- Windows Portable Release Gate 및 실행 진단
+Release에서 `VCC_Office_Edition_<version>_Windows_Portable.zip`을 내려받아 압축을 푼 뒤 `01_START_VCC.bat`을 실행합니다.
 
-## 권장 사용법
+Bootstrap 소스 패키지를 직접 사용할 경우 처음 한 번 `00_SETUP_RUNTIME.bat`을 실행합니다.
 
-### 1. 바로 사용하기
-GitHub Pages에서 웹 버전을 실행합니다.
+## 개발·배포 원칙
 
-### 2. Windows 업무용
-GitHub Releases에서 최신 `VCC_Windows_Portable_*.zip`을 내려받아 압축을 푼 뒤 실행합니다.
+- 브라우저 UI + 로컬 Python 처리 엔진
+- `127.0.0.1` loopback only
+- 고정 포트를 사용하지 않고 빈 포트 자동 선택
+- 사용자 원본 파일 덮어쓰기 금지
+- 기능 이관 시 회귀테스트 우선
+- 태그 `v*` 생성 시 Windows Portable Release 자동 생성
 
-### 3. 개발·검증
-이 저장소의 `main`은 배포 가능한 상태를 유지하고, 기능 변경은 별도 브랜치와 Pull Request에서 검증한 뒤 병합합니다.
+## 버전
 
-## 배포 원칙
+현재 정식 기준: **1.0.0**  
+개발 기준 빌드: **v3.5 RC4 Windows 실기기 확인본**
 
-1. `main`에 병합하기 전에 자동 품질점검을 통과합니다.
-2. `main` 병합 시 GitHub Pages를 자동 배포합니다.
-3. 정식 버전은 `v1.0.0` 같은 태그로 관리합니다.
-4. Windows Portable ZIP은 GitHub Releases에서 배포합니다.
-5. 실제 학생·교직원·민원인 개인정보나 학교폭력·상담·건강·징계·인사 등 민감자료는 외부 AI에 그대로 입력하지 않습니다.
+## 라이선스 / 저작권
 
-자세한 배포 절차는 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)를 참고하세요.
-
-## 저작권
+`LICENSE.txt`, `THIRD_PARTY_NOTICES.txt`를 확인하세요.
 
 © 2026 강창원. All rights reserved.
+
+
+## Open Creator Beta
+- 자유 창작을 기본 시작점으로 제공합니다.
+- 게임·학습앱·AI 비서·시뮬레이터·생활앱·센서/하드웨어 앱 등 자유 아이디어를 설계할 수 있습니다.
+- 기존 업무도구 및 Migration Lab 기능은 그대로 유지합니다.
