@@ -1,0 +1,48 @@
+name: Quality Gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate web entry
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, sys
+
+          p = Path('index.html')
+          if not p.exists():
+              raise SystemExit('index.html is missing')
+          text = p.read_text(encoding='utf-8')
+          low = text.lower()
+          for token in ('<!doctype html', '<html', '</html>', '<body', '</body>'):
+              if token not in low:
+                  raise SystemExit(f'missing HTML token: {token}')
+
+          ids = re.findall(r'\bid=["\']([^"\']+)["\']', text)
+          duplicates = sorted({x for x in ids if ids.count(x) > 1})
+          if duplicates:
+              raise SystemExit('duplicate DOM ids: ' + ', '.join(duplicates[:20]))
+
+          refs = set(re.findall(r'getElementById\(["\']([^"\']+)["\']\)', text))
+          missing = sorted(refs - set(ids))
+          if missing:
+              raise SystemExit('missing DOM ids referenced by JS: ' + ', '.join(missing[:20]))
+
+          print(f'PASS: {len(ids)} DOM ids, {len(refs)} direct JS references')
+          PY
